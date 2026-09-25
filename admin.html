@@ -89,16 +89,16 @@
     <a class="logout" href="#" id="btnLogout">Abmelden</a>
   </div>
 
-  <div class="group-block" data-group="kind">
-    <div class="group-title">Kategorie: Kind</div>
-    <div class="group-count" id="countKind">0 Einträge</div>
+  <div class="group-block" data-group="jugendliche">
+    <div class="group-title">Kategorie: Jugendliche</div>
+    <div class="group-count" id="countJugendliche">0 Einträge</div>
     <div class="actions">
-      <button class="btn btn-ghost" data-action="export" data-group="kind">CSV exportieren</button>
-      <button class="btn btn-danger" data-action="clear" data-group="kind">Bestenliste leeren</button>
+      <button class="btn btn-ghost" data-action="export" data-group="jugendliche">CSV exportieren</button>
+      <button class="btn btn-danger" data-action="clear" data-group="jugendliche">Bestenliste leeren</button>
     </div>
     <table>
       <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th><th>Zeit</th><th>Datum</th></tr></thead>
-      <tbody id="tableKind"></tbody>
+      <tbody id="tableJugendliche"></tbody>
     </table>
   </div>
 
@@ -154,8 +154,9 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const GROUPS = ["kind","erwachsener"];
-  const GROUP_LABEL = { kind: "Kind", erwachsener: "Erwachsene" };
+  const GROUPS = ["jugendliche","erwachsener"];
+  const GROUP_LABEL = { jugendliche: "Jugendliche", erwachsener: "Erwachsene" };
+  function capitalize(group){ return group.charAt(0).toUpperCase() + group.slice(1); }
 
   function formatTime(ms){ return (ms/1000).toFixed(1) + "s"; }
 
@@ -203,9 +204,9 @@
 
   async function renderGroup(group){
     const list = await ScoreStore.getScores(group);
-    const label = group === "kind" ? "Kind" : "Erwachsener";
-    $("count" + (group === "kind" ? "Kind" : "Erwachsener")).textContent = list.length + " Einträge";
-    const tbody = $("table" + (group === "kind" ? "Kind" : "Erwachsener"));
+    const idSuffix = capitalize(group);
+    $("count" + idSuffix).textContent = list.length + " Einträge";
+    const tbody = $("table" + idSuffix);
     tbody.innerHTML = "";
     if(list.length === 0){
       tbody.innerHTML = '<tr><td colspan="5" class="empty">Keine Einträge</td></tr>';

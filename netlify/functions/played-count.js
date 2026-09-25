@@ -1,11 +1,11 @@
 // netlify/functions/played-count.js
 // Zentraler Zaehler "wie oft gespielt" pro Gruppe, ueber Netlify Blobs.
-// GET  /api/played-count?group=kind|erwachsener  -> { count }
-// POST /api/played-count?group=kind|erwachsener  -> zaehlt +1 hoch, gibt neue { count } zurueck
+// GET  /api/played-count?group=jugendliche|erwachsener  -> { count }
+// POST /api/played-count?group=jugendliche|erwachsener  -> zaehlt +1 hoch, gibt neue { count } zurueck
 
 import { getStore } from "@netlify/blobs";
 
-const GROUPS = ["kind", "erwachsener"];
+const GROUPS = ["jugendliche", "erwachsener"];
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

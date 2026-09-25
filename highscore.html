@@ -73,8 +73,7 @@
 </head>
 <body>
 
-<img class="logo" id="logoImg" alt="HKV Nordwest Logo"
-     src="https://www.hkvnordwest.ch/themes/custom/hkvaarau/assets/img/21001_gm_de_petrol.png">
+<img class="logo" id="logoImg" alt="HKV Nordwest Logo" src="hkv-logo-nordwest_neg-4x.png">
 <div class="logo-fallback" id="logoFallback">HKV Nordwest</div>
 
 <div class="top">
@@ -85,7 +84,7 @@
 </div>
 
 <div class="tabs">
-  <button class="tab active" id="tabKind" data-group="kind">Kinder</button>
+  <button class="tab active" id="tabJugendliche" data-group="jugendliche">Jugendliche</button>
   <button class="tab" id="tabErwachsener" data-group="erwachsener">Erwachsene</button>
 </div>
 
@@ -96,7 +95,7 @@
 <script>
 (function(){
   "use strict";
-  const STORAGE_PREFIX = "messequiz_v2_";
+  const STORAGE_PREFIX = "messequiz_v4_";
   const REFRESH_MS = 60000;
 
   /* =========================================================
@@ -121,7 +120,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  let currentGroup = "kind";
+  let currentGroup = "jugendliche";
 
   $("logoImg").addEventListener("error", function(){
     this.style.display = "none";
@@ -157,12 +156,12 @@
 
   function setGroup(group){
     currentGroup = group;
-    $("tabKind").classList.toggle("active", group === "kind");
+    $("tabJugendliche").classList.toggle("active", group === "jugendliche");
     $("tabErwachsener").classList.toggle("active", group === "erwachsener");
     render();
   }
 
-  $("tabKind").addEventListener("click", () => setGroup("kind"));
+  $("tabJugendliche").addEventListener("click", () => setGroup("jugendliche"));
   $("tabErwachsener").addEventListener("click", () => setGroup("erwachsener"));
 
   render();

@@ -8,9 +8,10 @@ Kiosk-Geräte am Stand sehen damit dieselbe Bestenliste.
 
 ```
 /
-├── index.html                  ← Quiz (Kind/Erwachsener-Auswahl + Fragen)
+├── index.html                  ← Quiz (Jugendliche/Erwachsener-Auswahl + Fragen)
 ├── highscore.html               ← Bestenliste (Auto-Refresh 60s)
 ├── admin.html                   ← Admin (Export/Löschen, passwortgeschützt)
+├── hkv-logo-nordwest_neg-4x.png ← HKV-Logo (lokal eingebunden)
 ├── netlify.toml                 ← Build-/Redirect-Konfiguration
 ├── package.json                 ← Dependency @netlify/blobs
 └── netlify/functions/
@@ -67,8 +68,14 @@ Netlify Blobs ist ab Kontoerstellung automatisch aktiv, es braucht
 der aktuellen Site. Kein Supabase/Firebase/externer Account nötig.
 
 Gespeicherte Keys im Store `messequiz`:
-- `scores_kind`, `scores_erwachsener` — je eine JSON-Liste mit Einträgen
-- `count_kind`, `count_erwachsener` — Zähler „wie oft gespielt“
+- `scores_jugendliche`, `scores_erwachsener` — je eine JSON-Liste mit Einträgen
+- `count_jugendliche`, `count_erwachsener` — Zähler „wie oft gespielt“
+
+**Achtung beim Umstieg von v3 auf v4:** Der Gruppen-Schlüssel wurde von
+`kind` auf `jugendliche` umbenannt. Falls in v3 bereits testweise
+Runden gespielt wurden, liegen deren Daten unter `scores_kind` /
+`count_kind` und werden von v4 nicht mehr gelesen. Vor dem Event bei
+Bedarf im Netlify-Blobs-Dashboard oder über den Admin-Bereich prüfen.
 
 ## 4. Testen nach dem Deploy
 
@@ -82,8 +89,8 @@ Gespeicherte Keys im Store `messequiz`:
 
 Schnell-Check der API direkt im Browser oder mit curl:
 ```bash
-curl "https://EURE-SITE.netlify.app/api/scores?group=kind"
-curl "https://EURE-SITE.netlify.app/api/played-count?group=kind"
+curl "https://EURE-SITE.netlify.app/api/scores?group=jugendliche"
+curl "https://EURE-SITE.netlify.app/api/played-count?group=jugendliche"
 ```
 
 ## 5. Offline-Verhalten am Stand
@@ -96,15 +103,19 @@ ein reiner Fallback, kein Sync-Mechanismus: rein lokal gespielte Runden
 während eines Ausfalls landen nicht automatisch nachträglich in der
 zentralen Bestenliste.
 
-## 6. Eigene Fragen einsetzen
+## 6. Fragen
 
-Die Platzhalterfragen stehen weiterhin oben im `<script>`-Block von
-`index.html` im Objekt `QUESTIONS` (getrennt nach `kind` und
-`erwachsener`). Dort einfach die echten Fragen eintragen — an der
-DB-Anbindung ändert sich dadurch nichts.
+Die finalen Fragen sind bereits eingetragen — oben im `<script>`-Block
+von `index.html` im Objekt `QUESTIONS` (getrennt nach `jugendliche` und
+`erwachsener`), übernommen aus `Fragen/Quiz_Jugendliche.docx` und
+`Fragen/Qiuz Fragen Erwachsene.docx`. Sollen die Fragen später
+geändert werden, direkt dort anpassen — an der DB-Anbindung ändert sich
+dadurch nichts.
 
 ## 7. CI-Farben & Logo
 
-Unverändert gegenüber v2: Farben sind als CSS-Variablen im `:root` jeder
-Datei hinterlegt (Näherungswert, bei Bedarf mit offiziellem HKV-Styleguide
-abgleichen), Logo wird per URL von hkvnordwest.ch eingebunden.
+Farben sind als CSS-Variablen im `:root` jeder Datei hinterlegt
+(Näherungswert, bei Bedarf mit offiziellem HKV-Styleguide abgleichen).
+Das Logo wird ab v4 lokal aus `hkv-logo-nordwest_neg-4x.png` (im
+gleichen Ordner) eingebunden statt per externer URL — dieses File muss
+beim Deployment mitgenommen werden.

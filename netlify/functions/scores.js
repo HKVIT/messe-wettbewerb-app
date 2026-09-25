@@ -1,11 +1,11 @@
 // netlify/functions/scores.js
 // Zentrale Bestenliste ueber Netlify Blobs (statt localStorage).
-// GET  /api/scores?group=kind|erwachsener        -> Liste zurueckgeben
-// POST /api/scores?group=kind|erwachsener        -> { entry } anhaengen, sortiert zurueckgeben
+// GET  /api/scores?group=jugendliche|erwachsener        -> Liste zurueckgeben
+// POST /api/scores?group=jugendliche|erwachsener        -> { entry } anhaengen, sortiert zurueckgeben
 
 import { getStore } from "@netlify/blobs";
 
-const GROUPS = ["kind", "erwachsener"];
+const GROUPS = ["jugendliche", "erwachsener"];
 const MAX_ENTRIES = 200;
 
 function json(data, status = 200) {

@@ -235,8 +235,7 @@
 <body>
 <div id="app">
 
-  <img class="logo" id="logoImg" alt="HKV Nordwest Logo"
-       src="https://www.hkvnordwest.ch/themes/custom/hkvaarau/assets/img/21001_gm_de_petrol.png">
+  <img class="logo" id="logoImg" alt="HKV Nordwest Logo" src="hkv-logo-nordwest_neg-4x.png">
   <div class="logo-fallback" id="logoFallback">HKV Nordwest</div>
 
   <!-- CHOICE / START -->
@@ -245,10 +244,10 @@
     <h1 class="hero">Wie schnell<br>bist <em>du</em>?</h1>
     <p class="sub">Beantworte die Fragen so schnell und richtig wie möglich. Wähle zuerst deine Kategorie.</p>
     <div class="choice-row">
-      <button class="choice-card" id="btnKind" data-group="kind">
-        <div class="choice-emoji">🧒</div>
-        <div class="choice-title">Kind</div>
-        <div class="choice-hint">Für unsere jüngsten Besucher:innen</div>
+      <button class="choice-card" id="btnJugendliche" data-group="jugendliche">
+        <div class="choice-emoji">🎓</div>
+        <div class="choice-title">Jugendliche</div>
+        <div class="choice-hint">Rund um Bewerbung, Lehre und HKV Nordwest</div>
       </button>
       <button class="choice-card" id="btnErwachsener" data-group="erwachsener">
         <div class="choice-emoji">🧑‍💼</div>
@@ -293,31 +292,31 @@
   "use strict";
 
   /* =========================================================
-     PLATZHALTER-FRAGEN — hier später die echten Fragen eintragen.
+     FRAGEN — final aus Fragen/Quiz_Jugendliche.docx und
+     Fragen/Qiuz Fragen Erwachsene.docx übernommen (Stand v4).
      Jede Frage braucht: text, options (genau 4 Stück), correct (Index 0-3)
-     Pro Gruppe 5-6 Fragen (Anzahl frei erweiterbar).
   ========================================================= */
   const QUESTIONS = {
-    kind: [
-      { text: "Wie viele Tage hat eine Woche?", options: ["5","6","7","8"], correct: 2 },
-      { text: "Welche Farbe hat unser HKV-Logo?", options: ["Petrol","Rot","Grün","Orange"], correct: 0 },
-      { text: "Wie viele Buchstaben hat das Wort „HKV“?", options: ["2","3","4","5"], correct: 1 },
-      { text: "Was ist 5 + 7?", options: ["11","12","13","10"], correct: 1 },
-      { text: "In welchem Fach lernt man rechnen?", options: ["Sport","Mathematik","Musik","Zeichnen"], correct: 1 },
-      { text: "Wie nennt man Geld, das man auf der Bank spart?", options: ["Erspartes","Ferien","Zeugnis","Rezept"], correct: 0 }
+    jugendliche: [
+      { text: "Deine Kollegin erzählt dir von HKV Nordwest. Welche Aussage ist Cap?", options: ["«HKV Nordwest hat einen Standort in Rheinfelden.»","«HKV Nordwest hat einen Standort in Olten.»","«Viele Lehrgänge kannst du auch online besuchen.»","«HKV Nordwest hat einen Standort in Basel.»"], correct: 3 },
+      { text: "Welcher Betreff für deine Bewerbungs-E-Mail ist sus?", options: ["Bewerbung als Kauffrau EFZ","Bewerbung für die Lehrstelle ab August 2027","hey 👋 habt ihr noch was frei?","Bewerbung Lehrstelle Kaufmann EFZ, Lea Meier"], correct: 2 },
+      { text: "Im Vorstellungsgespräch fragt man dich, warum du diese Lehre machen willst. Mit welcher Antwort slayst du?", options: ["«Keine Ahnung, meine Mutter hat gesagt, ich soll.»","«Real talk: Beim Schnuppern hat mir die Arbeit im Team richtig gefallen.»","«Weil ich sonst nichts gefunden habe.»","«Wegen dem Lohn halt.»"], correct: 1 },
+      { text: "Welche Nachricht an deine Berufsbildner/-in ist cringe?", options: ["«Guten Morgen, ich bin krank und melde mich für heute ab.»","«Danke für Ihre Hilfe heute!»","«yo komme heute später»","«Darf ich Ihnen morgen eine Frage stellen?»"], correct: 2 },
+      { text: "Welcher Plan nach der Lehre hat Aura?", options: ["«Lernen? Nie wieder.»","«Mal schauen, was so passiert.»","«Ich mache eine Weiterbildung bei HKV Nordwest.»","«Ich warte, bis mich jemand anruft.»"], correct: 2 },
+      { text: "Dein Kollege überlegt, ins KV zu gehen. Welche Aussage von ihm ist lost?", options: ["«Im KV habe ich viel Kontakt mit Kundinnen und Kunden.»","«Das KV gibt es in ganz vielen Branchen, von der Bank bis zum Reisebüro.»","«Im KV sitze ich den ganzen Tag allein und rede mit niemandem.»","«Die KV-Lehre dauert drei Jahre.»"], correct: 2 }
     ],
     erwachsener: [
-      { text: "Seit welchem Jahr steht die HKV für „Bildung mit Tradition“?", options: ["1875","1901","1932","1960"], correct: 0 },
-      { text: "Wofür steht die Abkürzung EFZ?", options: ["Eidgenössisches Fähigkeitszeugnis","Europäisches Förderzertifikat","Einheitliches Firmenzeugnis","Erweiterte Fachzulassung"], correct: 0 },
-      { text: "Wie lange dauert die kaufmännische Grundbildung EFZ in der Regel?", options: ["2 Jahre","3 Jahre","4 Jahre","5 Jahre"], correct: 1 },
-      { text: "In welcher Stadt liegt die HKV Aarau?", options: ["Basel","Aarau","Olten","Zürich"], correct: 1 },
-      { text: "Wie heisst die Ausbildungsform, die Berufsschule und Betrieb kombiniert?", options: ["Vollzeitschule","Duale Berufsbildung","Fernstudium","Praktikumsjahr"], correct: 1 },
-      { text: "Welcher Abschluss öffnet direkt den Zugang zur Fachhochschule?", options: ["Berufsmatura","Sekundarschule","Primarschule","Kindergarten"], correct: 0 }
+      { text: "An welchen Standorten bietet HKV Nordwest Weiterbildungen an?", options: ["Basel und Liestal","Rheinfelden und Olten","Aarau und Zürich","Solothurn und Bern"], correct: 1 },
+      { text: "Was ist KVdigital?", options: ["Eine Social-Media-Agentur","Die selbst entwickelte digitale Lernplattform der HKV","Ein Onlineshop für Lehrmittel","Eine App für Stundenpläne"], correct: 1 },
+      { text: "Was bietet KVdigital?", options: ["Ein Archiv, in dem die Unterlagen als PDF abgelegt sind","Eine Videoplattform mit aufgezeichneten Lektionen","Ein umfangreiches, interaktives und kollaboratives Lernumfeld","Ein Prüfungstool für das Selbststudium zu Hause"], correct: 2 },
+      { text: "Welche Unterrichtsformen bietet HKV Nordwest an?", options: ["Nur Präsenzunterricht im Schulzimmer","Nur Online-Unterricht","Präsenz, online und eine Kombination aus beidem","Hybrid-Unterricht"], correct: 2 },
+      { text: "Welchen englischen Titelzusatz dürfen Absolventinnen und Absolventen eines eidgenössischen Fachausweises neu führen?", options: ["Professional Bachelor","Master of Business","Swiss Expert","Certified Professional"], correct: 0 },
+      { text: "Wie können Sie einen Lehrgang von HKV Nordwest vorab kennenlernen?", options: ["Mit einem Probemonat","An einem kostenlosen Infoanlass vor Ort oder online","Nur über ein Video auf YouTube","Gar nicht, man meldet sich direkt an"], correct: 1 }
     ]
   };
 
   const IDLE_RESET_MS = 25000; // Zeit ohne Interaktion bis zurück zur Auswahl
-  const STORAGE_PREFIX = "messequiz_v2_";
+  const STORAGE_PREFIX = "messequiz_v4_";
 
   /* =========================================================
      ScoreStore — Datenzugriffs-Schicht
@@ -402,7 +401,7 @@
     resetIdleTimer();
   }
 
-  // Logo-Fallback, falls das Bild von hkvnordwest.ch nicht geladen werden kann
+  // Logo-Fallback, falls das lokale Logo-Bild nicht geladen werden kann
   $("logoImg").addEventListener("error", function(){
     this.style.display = "none";
     $("logoFallback").style.display = "block";
@@ -420,7 +419,7 @@
   });
 
   /* ---------------- quiz state ---------------- */
-  let currentGroup = "kind";
+  let currentGroup = "jugendliche";
   let currentQuestion = 0;
   let answered = false;
   let correctCount = 0;
@@ -541,7 +540,7 @@
     $("resultRank").innerHTML = rank > 0
       ? "Aktuelle Platzierung: <b>" + rank + ".</b> von " + list.length
       : "Platzierung folgt in der Bestenliste";
-    $("resultPlayer").textContent = "Spieler " + playerNumber + " · Kategorie: " + (currentGroup === "kind" ? "Kind" : "Erwachsene");
+    $("resultPlayer").textContent = "Spieler " + playerNumber + " · Kategorie: " + (currentGroup === "jugendliche" ? "Jugendliche" : "Erwachsene");
     $("playedCount").textContent = playerNumber;
     showScreen("result");
   }
@@ -552,12 +551,12 @@
   }
 
   /* ---------------- wiring ---------------- */
-  $("btnKind").addEventListener("click", () => startQuiz("kind"));
+  $("btnJugendliche").addEventListener("click", () => startQuiz("jugendliche"));
   $("btnErwachsener").addEventListener("click", () => startQuiz("erwachsener"));
   $("btnPlayAgain").addEventListener("click", () => startQuiz(currentGroup));
 
   // init
-  ScoreStore.getPlayedCount("kind").then(n => $("playedCount").textContent = n);
+  ScoreStore.getPlayedCount("jugendliche").then(n => $("playedCount").textContent = n);
 })();
 </script>
 </body>

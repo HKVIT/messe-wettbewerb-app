@@ -1,30 +1,28 @@
 ---
-title: Changelog Netlify-Integration + zentrale DB
-created: 2026-09-23
+title: Changelog v4 — echte Fragen, Jugendliche statt Kind, eigenes Logo
+created: 2026-09-25
 ---
 
-# Changelog Netlify-Integration + zentrale DB
+# Changelog v4
 
-## Neue/geänderte Dateien (im Zip `hkv-messe-quiz-netlify.zip`)
-- `index.html`, `highscore.html`, `admin.html` — v2-Seiten, `ScoreStore` jetzt an echte API angebunden statt localStorage
-- `netlify/functions/scores.js` — Bestenliste lesen/schreiben (Netlify Blobs)
-- `netlify/functions/played-count.js` — zentraler Spielzähler
-- `netlify/functions/admin-login.js`, `admin-clear.js` — Passwortprüfung serverseitig
-- `netlify.toml`, `package.json` — Build-/Function-Konfiguration
-- `README.md` — Schritt-für-Schritt-Deployment-Anleitung
+## Neu gegenüber v3
+- Platzhalterfragen entfernt und durch die finalen Fragen aus `Fragen/Quiz_Jugendliche.docx` und `Fragen/Qiuz Fragen Erwachsene.docx` ersetzt (je 6 Fragen, 4 Antwortoptionen, dynamische Reihenfolge wie bisher).
+- Kategorie "Kind" auf der Startseite, in der Bestenliste, im Admin-Bereich und im Backend (Netlify Functions) in **"Jugendliche"** umbenannt (Gruppen-Schlüssel: `kind` → `jugendliche`).
+- HKV-Logo wird jetzt lokal aus der Datei `hkv-logo-nordwest_neg-4x.png` eingebunden statt über die externe URL `hkvnordwest.ch` (robuster, unabhängig von der Live-Website; Fallback-Text bleibt als zusätzliches Netz erhalten).
+- localStorage-Präfix für den Offline-Fallback von `messequiz_v2_` auf `messequiz_v4_` erhöht, damit keine alten Testdaten unter dem falschen Gruppennamen "kind" hängen bleiben.
 
-## Umgesetzt
-- Zentrale Bestenliste über Netlify Blobs (kein zusätzlicher DB-Dienst nötig)
-- Admin-Passwort aus dem Frontend-Code entfernt, liegt jetzt als Environment-Variable `ADMIN_PASSWORD` in den Netlify-Site-Settings; jede Löschaktion prüft es serverseitig erneut
-- Quiz + Bestenliste haben einen localStorage-Fallback bei Verbindungsausfall, ohne dass das die zentrale DB-Logik ersetzt
+## Betroffene Dateien
+- `index.html` — Fragen, Gruppenname, Logo, Storage-Präfix
+- `highscore.html` — Tab "Kinder" → "Jugendliche", Gruppenname, Logo, Storage-Präfix
+- `admin.html` — Kategorie-Block "Kind" → "Jugendliche", Gruppenname, generische ID-Ableitung
+- `netlify/functions/scores.js`, `played-count.js`, `admin-clear.js` — `GROUPS`-Liste von `["kind","erwachsener"]` auf `["jugendliche","erwachsener"]` angepasst
+- `netlify.toml`, `package.json`, `netlify/functions/admin-login.js` — unverändert aus v3 übernommen
+- `hkv-logo-nordwest_neg-4x.png` — vom Nutzer abgelegtes Logo, neu Teil des Deploy-Ordners
+
+## Wichtig für den Go-Live
+- Da sich der Gruppen-Schlüssel geändert hat (`kind` → `jugendliche`), sind etwaige bereits in Netlify Blobs gespeicherte Testdaten unter `scores_kind` / `count_kind` aus v3 **nicht** automatisch sichtbar. Für einen sauberen Start vor dem Event einmal über den Admin-Bereich (oder Netlify-Blobs-Dashboard) prüfen/bereinigen.
+- Restliche offene Punkte aus v3 (Netlify verbinden, `ADMIN_PASSWORD` setzen, CI-Farben ggf. abgleichen) sind weiterhin offen — siehe `DEPLOY.md`.
 
 ## Offene Punkte / bewusste Annahmen
-- Zähler-Inkrement (`played-count.js`) ist nicht 100% race-condition-frei bei sehr vielen gleichzeitigen Anfragen — für einen Messestand mit wenigen Kiosk-Geräten unproblematisch
-- Bestenliste ist über `/api/scores` öffentlich lesbar (keine sensiblen Daten enthalten, daher bewusst kein Passwortschutz auf Lesezugriff)
-- ADMIN_PASSWORD muss vor dem ersten Einsatz manuell in den Netlify-Site-Settings gesetzt werden, sonst meldet der Login "Server ist noch nicht konfiguriert"
-
-## Nächste Schritte (Vorschlag)
-1. Repo auf Netlify verbinden (Git-Connect oder Netlify CLI) und deployen
-2. `ADMIN_PASSWORD` in den Site-Settings setzen
-3. Nach Deploy die drei URLs (`/`, `/highscore.html`, `/admin.html`) am Stand testen, inkl. paralleler Geräte
-4. Echte Fragen statt Platzhalter in `index.html` eintragen
+- Emoji/Choice-Icon für "Jugendliche" auf 🎓 geändert (vorher 🧒 für "Kind"), Hinweistext an die Zielgruppe (Bewerbung/Lehre) angepasst.
+- Die Slang-Formulierungen der Jugendlichen-Fragen (Cap, sus, slay, cringe, Aura, lost) wurden 1:1 aus dem Word-Dokument übernommen.
