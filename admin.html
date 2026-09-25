@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HKV Messe-Quiz — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2A30;
+    --panel:#123B42;
+    --panel-2:#1B4A52;
+    --line:#2C5A62;
+    --white:#F5F8F7;
+    --muted:#9DB7BA;
+    --accent:#FFC845;
+    --red:#FF5C5C;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--white);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100vh;
+    padding:clamp(20px,4vw,56px);
+  }
+  h1{font-size:clamp(26px,3vw,36px);margin:0 0 6px;}
+  .hint{color:var(--muted);font-size:14px;max-width:60ch;margin:0 0 30px;}
+
+  /* ---- Login-Gate ---- */
+  #gate{max-width:420px;margin-top:60px;}
+  #gate input{
+    width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line);
+    background:var(--panel);color:var(--white);font-family:inherit;font-size:16px;margin-bottom:14px;
+  }
+  #gate .error{color:var(--red);font-size:14px;min-height:20px;margin-bottom:8px;}
+
+  .btn{
+    appearance:none;border:none;border-radius:12px;font-family:inherit;font-weight:600;
+    cursor:pointer;padding:13px 26px;font-size:15px;
+  }
+  .btn-primary{background:var(--accent);color:var(--ink);}
+  .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red);}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);}
+  .btn:active{transform:scale(0.98);}
+
+  #panel{display:none;}
+  .group-block{margin-bottom:36px;}
+  .group-title{font-size:20px;font-weight:700;margin:0 0 4px;}
+  .group-count{color:var(--muted);font-size:14px;margin:0 0 14px;}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+
+  table{border-collapse:collapse;width:100%;max-width:900px;font-size:14px;}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:600;}
+  .empty{color:var(--muted);font-size:14px;padding:10px 0;}
+
+  .top-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+  .logout{color:var(--muted);font-size:13px;text-decoration:none;border:1px solid var(--line);padding:8px 16px;border-radius:10px;}
+  .logout:hover{color:var(--white);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="gate">
+  <h1>Admin-Bereich</h1>
+  <p class="hint">
+    Bitte Passwort eingeben. Das Passwort wird serverseitig gegen die
+    Environment-Variable <code>ADMIN_PASSWORD</code> geprüft (Netlify Function
+    <code>admin-login</code>) — es steht nicht mehr im Quellcode dieser Seite.
+  </p>
+  <input type="password" id="pw" placeholder="Passwort" autocomplete="off">
+  <div class="error" id="pwError"></div>
+  <button class="btn btn-primary" id="btnLogin">Anmelden</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="panel">
+  <div class="top-actions">
+    <div>
+      <h1>Bestenlisten verwalten</h1>
+      <p class="hint" style="margin-bottom:0;">Export als CSV oder komplett leeren — pro Kategorie getrennt.</p>
+    </div>
+    <a class="logout" href="#" id="btnLogout">Abmelden</a>
+  </div>
+
+  <div class="group-block" data-group="kind">
+    <div class="group-title">Kategorie: Kind</div>
+    <div class="group-count" id="countKind">0 Einträge</div>
+    <div class="actions">
+      <button class="btn btn-ghost" data-action="export" data-group="kind">CSV exportieren</button>
+      <button class="btn btn-danger" data-action="clear" data-group="kind">Bestenliste leeren</button>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th><th>Zeit</th><th>Datum</th></tr></thead>
+      <tbody id="tableKind"></tbody>
+    </table>
+  </div>
+
+  <div class="group-block" data-group="erwachsener">
+    <div class="group-title">Kategorie: Erwachsene</div>
+    <div class="group-count" id="countErwachsener">0 Einträge</div>
+    <div class="actions">
+      <button class="btn btn-ghost" data-action="export" data-group="erwachsener">CSV exportieren</button>
+      <button class="btn btn-danger" data-action="clear" data-group="erwachsener">Bestenliste leeren</button>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Spieler</th><th>Punkte</th><th>Zeit</th><th>Datum</th></tr></thead>
+      <tbody id="tableErwachsener"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /*
+    Passwortschutz jetzt serverseitig:
+    - Login prüft gegen /api/admin-login (Env-Variable ADMIN_PASSWORD)
+    - Löschen prüft das Passwort bei JEDEM Aufruf erneut gegen
+      /api/admin-clear, damit ein blosses "eingeloggt sein" im Browser
+      nicht zum Löschen reicht.
+    Das Passwort wird nur im Speicher (JS-Variable) gehalten, nie in
+    localStorage/sessionStorage abgelegt.
+  */
+  let adminPassword = null; // nur zur Laufzeit im Speicher, nicht persistiert
+
+  /* ScoreStore liest die zentrale Bestenliste über die Netlify Function */
+  const ScoreStore = {
+    async getScores(group){
+      try{
+        const res = await fetch("/api/scores?group=" + encodeURIComponent(group), { cache: "no-store" });
+        if(!res.ok) return [];
+        return await res.json();
+      }catch(e){ return []; }
+    },
+    async clearScores(group, password){
+      const res = await fetch("/api/admin-clear", {
+        method: "POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify({ group, password })
+      });
+      if(!res.ok){
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || ("HTTP " + res.status));
+      }
+      return true;
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const GROUPS = ["kind","erwachsener"];
+  const GROUP_LABEL = { kind: "Kind", erwachsener: "Erwachsene" };
+
+  function formatTime(ms){ return (ms/1000).toFixed(1) + "s"; }
+
+  function showPanel(){
+    $("gate").style.display = "none";
+    $("panel").style.display = "block";
+    renderAll();
+  }
+  function showGate(){
+    $("panel").style.display = "none";
+    $("gate").style.display = "block";
+  }
+
+  $("btnLogin").addEventListener("click", async () => {
+    const val = $("pw").value;
+    $("btnLogin").disabled = true;
+    $("pwError").textContent = "";
+    try{
+      const res = await fetch("/api/admin-login", {
+        method: "POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify({ password: val })
+      });
+      const data = await res.json();
+      if(data.ok){
+        adminPassword = val; // nur im Speicher, fuer spaetere Loesch-Aufrufe
+        showPanel();
+      }else{
+        $("pwError").textContent = data.error === "ADMIN_PASSWORD not configured"
+          ? "Server ist noch nicht konfiguriert (ADMIN_PASSWORD fehlt)."
+          : "Falsches Passwort.";
+      }
+    }catch(e){
+      $("pwError").textContent = "Server nicht erreichbar.";
+    }finally{
+      $("btnLogin").disabled = false;
+    }
+  });
+  $("pw").addEventListener("keydown", (e) => { if(e.key === "Enter") $("btnLogin").click(); });
+  $("btnLogout").addEventListener("click", (e) => {
+    e.preventDefault();
+    adminPassword = null;
+    showGate();
+  });
+
+  async function renderGroup(group){
+    const list = await ScoreStore.getScores(group);
+    const label = group === "kind" ? "Kind" : "Erwachsener";
+    $("count" + (group === "kind" ? "Kind" : "Erwachsener")).textContent = list.length + " Einträge";
+    const tbody = $("table" + (group === "kind" ? "Kind" : "Erwachsener"));
+    tbody.innerHTML = "";
+    if(list.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">Keine Einträge</td></tr>';
+      return;
+    }
+    list.forEach((entry, i) => {
+      const d = new Date(entry.ts);
+      const dateStr = d.toLocaleDateString("de-CH") + " " + d.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"});
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + (i+1) + "</td>" +
+        "<td>Spieler " + entry.player + "</td>" +
+        "<td>" + entry.score + "/" + entry.total + "</td>" +
+        "<td>" + formatTime(entry.timeMs) + "</td>" +
+        "<td>" + dateStr + "</td>";
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderAll(){
+    GROUPS.forEach(renderGroup);
+  }
+
+  function toCSV(list){
+    const header = "Platz;Spieler;Punkte;Total;Zeit_ms;Zeitpunkt";
+    const rows = list.map((e, i) => [i+1, "Spieler " + e.player, e.score, e.total, e.timeMs, e.ts].join(";"));
+    return [header].concat(rows).join("\n");
+  }
+
+  async function exportGroup(group){
+    const list = await ScoreStore.getScores(group);
+    const csv = toCSV(list);
+    const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "bestenliste_" + group + "_" + new Date().toISOString().slice(0,10) + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function clearGroup(group){
+    const ok = confirm("Bestenliste \"" + GROUP_LABEL[group] + "\" wirklich unwiderruflich leeren?");
+    if(!ok) return;
+    try{
+      await ScoreStore.clearScores(group, adminPassword);
+      renderGroup(group);
+    }catch(e){
+      alert("Löschen fehlgeschlagen: " + e.message);
+    }
+  }
+
+  document.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const action = btn.getAttribute("data-action");
+      const group = btn.getAttribute("data-group");
+      if(action === "export") exportGroup(group);
+      if(action === "clear") clearGroup(group);
+    });
+  });
+
+  // Keine persistente Session mehr: nach Reload muss das Passwort neu
+  // eingegeben werden (bewusst, da wir es nicht mehr im Klartext im
+  // Code haben und es auch nicht im Browser-Speicher ablegen wollen).
+})();
+</script>
+</body>
+</html>

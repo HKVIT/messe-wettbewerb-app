@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>HKV Messe-Quiz — Bestenliste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B2A30;
+    --panel:#123B42;
+    --panel-2:#1B4A52;
+    --line:#2C5A62;
+    --white:#F5F8F7;
+    --muted:#9DB7BA;
+    --accent:#FFC845;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--white);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100vh;
+    padding:clamp(20px,4vw,56px);
+    padding-top:calc(clamp(20px,4vw,56px) + 60px);
+  }
+  .logo{position:fixed;top:clamp(14px,2.4vw,26px);left:clamp(14px,2.4vw,26px);height:clamp(34px,4.2vw,52px);}
+  .logo-fallback{position:fixed;top:clamp(14px,2.4vw,26px);left:clamp(14px,2.4vw,26px);font-weight:700;font-size:20px;display:none;}
+
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+  h1{font-size:clamp(28px,3.6vw,44px);font-weight:700;margin:0;}
+  .refresh-note{color:var(--muted);font-size:13px;margin-top:4px;}
+  .refresh-note b{color:var(--accent);}
+
+  .tabs{display:flex;gap:10px;margin-bottom:22px;}
+  .tab{
+    appearance:none;border:1px solid var(--line);background:transparent;color:var(--muted);
+    font-family:inherit;font-weight:600;font-size:15px;padding:10px 20px;border-radius:12px;cursor:pointer;
+  }
+  .tab.active{background:var(--accent);color:var(--ink);border-color:var(--accent);}
+
+  .hs-list{display:flex;flex-direction:column;gap:8px;max-width:900px;}
+  .hs-row{
+    display:grid;
+    grid-template-columns:3ch 1fr auto auto auto;
+    gap:18px;
+    align-items:center;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 20px;
+    font-size:clamp(15px,1.6vw,18px);
+  }
+  .hs-row:nth-child(1){border-color:var(--accent);}
+  .hs-rank{color:var(--muted);font-weight:600;}
+  .hs-row:nth-child(1) .hs-rank{color:var(--accent);}
+  .hs-player{font-weight:600;}
+  .hs-score{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);}
+  .hs-time{font-variant-numeric:tabular-nums;color:var(--white);}
+  .hs-ts{color:var(--muted);font-size:0.85em;}
+  .hs-empty{color:var(--muted);margin-top:30px;}
+
+  .back{display:inline-block;margin-top:26px;color:var(--muted);text-decoration:none;font-size:14px;border:1px solid var(--line);padding:10px 18px;border-radius:12px;}
+  .back:hover{color:var(--white);border-color:var(--muted);}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<img class="logo" id="logoImg" alt="HKV Nordwest Logo"
+     src="https://www.hkvnordwest.ch/themes/custom/hkvaarau/assets/img/21001_gm_de_petrol.png">
+<div class="logo-fallback" id="logoFallback">HKV Nordwest</div>
+
+<div class="top">
+  <div>
+    <h1>Bestenliste</h1>
+    <div class="refresh-note">Aktualisiert automatisch alle <b>60</b> Sekunden — zuletzt aktualisiert: <span id="lastUpdate">–</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tabKind" data-group="kind">Kinder</button>
+  <button class="tab" id="tabErwachsener" data-group="erwachsener">Erwachsene</button>
+</div>
+
+<div class="hs-list" id="hsList"></div>
+
+<a class="back" href="index.html">← Zurück zum Quiz</a>
+
+<script>
+(function(){
+  "use strict";
+  const STORAGE_PREFIX = "messequiz_v2_";
+  const REFRESH_MS = 60000;
+
+  /* =========================================================
+     ScoreStore — liest die zentrale Bestenliste über die Netlify
+     Function /api/scores (Speicher: Netlify Blobs). Läuft die Seite
+     zufällig offline, wird kurz auf den letzten localStorage-Stand
+     zurückgefallen, damit die Anzeige nicht leer bleibt.
+  ========================================================= */
+  const ScoreStore = {
+    async getScores(group){
+      try{
+        const res = await fetch("/api/scores?group=" + encodeURIComponent(group), { cache: "no-store" });
+        if(!res.ok) throw new Error("scores fetch failed");
+        return await res.json();
+      }catch(e){
+        try{
+          const raw = localStorage.getItem(STORAGE_PREFIX + "scores_" + group);
+          return raw ? JSON.parse(raw) : [];
+        }catch(e2){ return []; }
+      }
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  let currentGroup = "kind";
+
+  $("logoImg").addEventListener("error", function(){
+    this.style.display = "none";
+    $("logoFallback").style.display = "block";
+  });
+
+  function formatTime(ms){ return (ms/1000).toFixed(1) + "s"; }
+
+  async function render(){
+    const list = await ScoreStore.getScores(currentGroup);
+    const wrap = $("hsList");
+    wrap.innerHTML = "";
+    if(list.length === 0){
+      wrap.innerHTML = '<div class="hs-empty">Noch keine Einträge — spiel die erste Runde!</div>';
+    }else{
+      list.forEach((entry, i) => {
+        const row = document.createElement("div");
+        row.className = "hs-row";
+        const d = new Date(entry.ts);
+        const dateStr = d.toLocaleDateString("de-CH", {day:"2-digit", month:"2-digit"}) +
+                        " " + d.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"});
+        row.innerHTML =
+          '<div class="hs-rank">' + (i + 1) + '</div>' +
+          '<div class="hs-player">Spieler ' + entry.player + '</div>' +
+          '<div class="hs-score">' + entry.score + '/' + entry.total + '</div>' +
+          '<div class="hs-time">' + formatTime(entry.timeMs) + '</div>' +
+          '<div class="hs-ts">' + dateStr + '</div>';
+        wrap.appendChild(row);
+      });
+    }
+    $("lastUpdate").textContent = new Date().toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  }
+
+  function setGroup(group){
+    currentGroup = group;
+    $("tabKind").classList.toggle("active", group === "kind");
+    $("tabErwachsener").classList.toggle("active", group === "erwachsener");
+    render();
+  }
+
+  $("tabKind").addEventListener("click", () => setGroup("kind"));
+  $("tabErwachsener").addEventListener("click", () => setGroup("erwachsener"));
+
+  render();
+  setInterval(render, REFRESH_MS);
+})();
+</script>
+</body>
+</html>

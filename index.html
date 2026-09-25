@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>HKV Messe-Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /*
+    CI-HINWEIS
+    ----------
+    Die Farbwerte unten sind eine petrolfarbene Annäherung an den Webauftritt
+    von hkvaarau.ch (automatischer Farb-Export aus der Live-Seite war aus
+    diesem Werkzeug heraus technisch nicht möglich - Farben bitte bei Bedarf
+    mit dem offiziellen CI/Styleguide der HKV abgleichen und hier anpassen).
+    Alle Farben sind zentral als CSS-Variablen definiert.
+  */
+  :root{
+    --ink:#0B2A30;
+    --panel:#123B42;
+    --panel-2:#1B4A52;
+    --line:#2C5A62;
+    --white:#F5F8F7;
+    --muted:#9DB7BA;
+    --accent:#FFC845;
+    --green:#3ECF8E;
+    --red:#FF5C5C;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--white);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    overflow:hidden;
+    user-select:none;
+    -webkit-user-select:none;
+    padding-top:var(--safe-top);
+    padding-bottom:var(--safe-bottom);
+  }
+  #app{position:relative;width:100%;height:100%;min-height:100vh;}
+
+  .logo{
+    position:absolute;
+    top:clamp(14px,2.4vw,26px);
+    left:clamp(14px,2.4vw,26px);
+    height:clamp(34px,4.2vw,52px);
+    z-index:5;
+  }
+  .logo-fallback{
+    position:absolute;
+    top:clamp(14px,2.4vw,26px);
+    left:clamp(14px,2.4vw,26px);
+    font-weight:700;
+    font-size:clamp(18px,2vw,22px);
+    letter-spacing:.04em;
+    color:var(--white);
+    z-index:5;
+    display:none;
+  }
+
+  .screen{
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    padding:clamp(20px,4vw,56px);
+  }
+  .screen.active{display:flex;}
+
+  /* ---------- CHOICE / START ---------- */
+  #screen-choice{
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    gap:clamp(18px,3vh,34px);
+    background:
+      radial-gradient(circle at 82% 12%, rgba(255,200,69,0.14), transparent 45%),
+      var(--ink);
+  }
+  .eyebrow-count{font-size:clamp(13px,1.6vw,16px);color:var(--muted);letter-spacing:.02em;}
+  .eyebrow-count b{color:var(--accent);font-weight:600;}
+  h1.hero{
+    font-size:clamp(36px,6.4vw,78px);
+    line-height:1.05;
+    font-weight:700;
+    margin:0;
+    max-width:18ch;
+  }
+  h1.hero em{font-style:normal;color:var(--accent);}
+  .sub{font-size:clamp(15px,1.8vw,21px);color:var(--muted);max-width:48ch;margin:0;}
+
+  .choice-row{
+    display:flex;
+    gap:clamp(16px,2.4vw,28px);
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:8px;
+  }
+  .choice-card{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--white);
+    border-radius:22px;
+    font-family:inherit;
+    cursor:pointer;
+    padding:clamp(28px,3.2vw,44px) clamp(34px,4vw,60px);
+    width:clamp(200px,22vw,280px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .choice-card:hover{border-color:var(--accent);}
+  .choice-card:active{transform:scale(0.97);}
+  .choice-emoji{font-size:clamp(36px,4.4vw,56px);}
+  .choice-title{font-size:clamp(22px,2.6vw,30px);font-weight:700;}
+  .choice-hint{font-size:clamp(13px,1.4vw,15px);color:var(--muted);}
+
+  .btn{
+    appearance:none;
+    border:none;
+    border-radius:16px;
+    font-family:inherit;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .12s ease, background .12s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{
+    background:var(--accent);
+    color:var(--ink);
+    font-size:clamp(18px,2vw,24px);
+    padding:clamp(16px,2vw,22px) clamp(34px,4vw,54px);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--line);
+    font-size:clamp(14px,1.4vw,17px);
+    padding:12px 22px;
+  }
+  .btn-ghost:hover{color:var(--white);border-color:var(--muted);}
+  .start-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:18px;}
+
+  /* ---------- QUIZ ---------- */
+  #screen-quiz{gap:clamp(18px,3vh,32px);}
+  .quiz-top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:clamp(44px,6vh,64px);}
+  .progress{display:flex;gap:6px;flex:1;}
+  .progress .seg{height:6px;flex:1;border-radius:3px;background:var(--line);overflow:hidden;}
+  .progress .seg.done{background:var(--accent);}
+  .progress .seg.now{background:var(--panel-2);position:relative;}
+  .timer{
+    font-variant-numeric:tabular-nums;
+    font-weight:700;
+    font-size:clamp(22px,3vw,34px);
+    color:var(--accent);
+    min-width:5ch;
+    text-align:right;
+  }
+  .q-meta{color:var(--muted);font-size:clamp(14px,1.5vw,17px);}
+  .q-text{
+    font-size:clamp(24px,3.6vw,40px);
+    font-weight:600;
+    line-height:1.15;
+    max-width:28ch;
+    flex:1;
+    display:flex;
+    align-items:center;
+  }
+  .answers{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-auto-rows:1fr;
+    gap:clamp(12px,1.6vw,20px);
+  }
+  .answer{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    color:var(--white);
+    font-family:inherit;
+    font-size:clamp(17px,1.9vw,23px);
+    font-weight:500;
+    text-align:left;
+    padding:clamp(18px,2.2vw,26px);
+    min-height:clamp(72px,10vh,110px);
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+    transition:background .1s ease, border-color .1s ease, transform .08s ease;
+  }
+  .answer:active{transform:scale(0.98);}
+  .answer.correct{background:rgba(62,207,142,0.18);border-color:var(--green);color:var(--green);}
+  .answer.wrong{background:rgba(255,92,92,0.16);border-color:var(--red);color:var(--red);}
+  .answer[disabled]{cursor:default;}
+
+  /* ---------- RESULT ---------- */
+  #screen-result{justify-content:center;align-items:center;text-align:center;gap:10px;}
+  .result-label{color:var(--muted);font-size:clamp(15px,1.6vw,19px);}
+  .result-score{
+    font-size:clamp(48px,9vw,110px);
+    font-weight:700;
+    color:var(--accent);
+    line-height:1;
+    margin:4px 0 0;
+  }
+  .result-score span{color:var(--muted);font-size:0.42em;font-weight:600;}
+  .result-time{font-size:clamp(20px,2.4vw,28px);font-weight:600;color:var(--white);margin:2px 0 0;}
+  .result-rank{
+    margin-top:10px;
+    font-size:clamp(16px,1.8vw,20px);
+    color:var(--muted);
+  }
+  .result-rank b{color:var(--accent);}
+  .result-player{font-size:clamp(15px,1.6vw,19px);color:var(--muted);margin-top:2px;}
+  .result-actions{display:flex;gap:16px;margin-top:24px;flex-wrap:wrap;justify-content:center;}
+  .idle-note{color:var(--muted);font-size:13px;margin-top:30px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <img class="logo" id="logoImg" alt="HKV Nordwest Logo"
+       src="https://www.hkvnordwest.ch/themes/custom/hkvaarau/assets/img/21001_gm_de_petrol.png">
+  <div class="logo-fallback" id="logoFallback">HKV Nordwest</div>
+
+  <!-- CHOICE / START -->
+  <section id="screen-choice" class="screen active">
+    <div class="eyebrow-count">Bisher gespielt: <b id="playedCount">0</b>×</div>
+    <h1 class="hero">Wie schnell<br>bist <em>du</em>?</h1>
+    <p class="sub">Beantworte die Fragen so schnell und richtig wie möglich. Wähle zuerst deine Kategorie.</p>
+    <div class="choice-row">
+      <button class="choice-card" id="btnKind" data-group="kind">
+        <div class="choice-emoji">🧒</div>
+        <div class="choice-title">Kind</div>
+        <div class="choice-hint">Für unsere jüngsten Besucher:innen</div>
+      </button>
+      <button class="choice-card" id="btnErwachsener" data-group="erwachsener">
+        <div class="choice-emoji">🧑‍💼</div>
+        <div class="choice-title">Erwachsene</div>
+        <div class="choice-hint">Rund um die HKV und Berufsbildung</div>
+      </button>
+    </div>
+    <div class="start-actions">
+      <a class="btn btn-ghost" href="highscore.html">Bestenliste ansehen</a>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-top">
+      <div class="progress" id="progress"></div>
+      <div class="timer" id="timer">00.0</div>
+    </div>
+    <div class="q-meta">Frage <span id="qNum">1</span> / <span id="qTotal">6</span></div>
+    <div class="q-text" id="qText">Frage wird geladen…</div>
+    <div class="answers" id="answers"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="screen-result" class="screen">
+    <div class="result-label">Dein Ergebnis</div>
+    <div class="result-score" id="resultScore">0<span>/0</span></div>
+    <div class="result-time" id="resultTime">Zeit: 00.0s</div>
+    <div class="result-rank" id="resultRank">Platzierung wird berechnet…</div>
+    <div class="result-player" id="resultPlayer">Spieler 1</div>
+    <div class="result-actions">
+      <button class="btn btn-primary" id="btnPlayAgain">Nochmal spielen</button>
+      <a class="btn btn-ghost" href="highscore.html">Bestenliste ansehen</a>
+    </div>
+    <div class="idle-note">Startet automatisch neu, falls niemand mehr tippt…</div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     PLATZHALTER-FRAGEN — hier später die echten Fragen eintragen.
+     Jede Frage braucht: text, options (genau 4 Stück), correct (Index 0-3)
+     Pro Gruppe 5-6 Fragen (Anzahl frei erweiterbar).
+  ========================================================= */
+  const QUESTIONS = {
+    kind: [
+      { text: "Wie viele Tage hat eine Woche?", options: ["5","6","7","8"], correct: 2 },
+      { text: "Welche Farbe hat unser HKV-Logo?", options: ["Petrol","Rot","Grün","Orange"], correct: 0 },
+      { text: "Wie viele Buchstaben hat das Wort „HKV“?", options: ["2","3","4","5"], correct: 1 },
+      { text: "Was ist 5 + 7?", options: ["11","12","13","10"], correct: 1 },
+      { text: "In welchem Fach lernt man rechnen?", options: ["Sport","Mathematik","Musik","Zeichnen"], correct: 1 },
+      { text: "Wie nennt man Geld, das man auf der Bank spart?", options: ["Erspartes","Ferien","Zeugnis","Rezept"], correct: 0 }
+    ],
+    erwachsener: [
+      { text: "Seit welchem Jahr steht die HKV für „Bildung mit Tradition“?", options: ["1875","1901","1932","1960"], correct: 0 },
+      { text: "Wofür steht die Abkürzung EFZ?", options: ["Eidgenössisches Fähigkeitszeugnis","Europäisches Förderzertifikat","Einheitliches Firmenzeugnis","Erweiterte Fachzulassung"], correct: 0 },
+      { text: "Wie lange dauert die kaufmännische Grundbildung EFZ in der Regel?", options: ["2 Jahre","3 Jahre","4 Jahre","5 Jahre"], correct: 1 },
+      { text: "In welcher Stadt liegt die HKV Aarau?", options: ["Basel","Aarau","Olten","Zürich"], correct: 1 },
+      { text: "Wie heisst die Ausbildungsform, die Berufsschule und Betrieb kombiniert?", options: ["Vollzeitschule","Duale Berufsbildung","Fernstudium","Praktikumsjahr"], correct: 1 },
+      { text: "Welcher Abschluss öffnet direkt den Zugang zur Fachhochschule?", options: ["Berufsmatura","Sekundarschule","Primarschule","Kindergarten"], correct: 0 }
+    ]
+  };
+
+  const IDLE_RESET_MS = 25000; // Zeit ohne Interaktion bis zurück zur Auswahl
+  const STORAGE_PREFIX = "messequiz_v2_";
+
+  /* =========================================================
+     ScoreStore — Datenzugriffs-Schicht
+     ---------------------------------------------------------
+     Zentrale Bestenliste über Netlify Functions + Netlify Blobs
+     (siehe /netlify/functions/scores.js und played-count.js).
+     Fällt der Server-Aufruf aus (z.B. offline am Stand), wird
+     lokal auf localStorage zurückgefallen, damit das Quiz trotzdem
+     spielbar bleibt — beim nächsten Erfolg wird wieder zentral
+     geschrieben.
+  ========================================================= */
+  const ScoreStore = {
+    async getScores(group){
+      try{
+        const res = await fetch("/api/scores?group=" + encodeURIComponent(group));
+        if(!res.ok) throw new Error("scores fetch failed");
+        return await res.json();
+      }catch(e){
+        try{
+          const raw = localStorage.getItem(STORAGE_PREFIX + "scores_" + group);
+          return raw ? JSON.parse(raw) : [];
+        }catch(e2){ return []; }
+      }
+    },
+    async submitScore(group, entry){
+      try{
+        const res = await fetch("/api/scores?group=" + encodeURIComponent(group), {
+          method: "POST",
+          headers: {"content-type":"application/json"},
+          body: JSON.stringify({ entry })
+        });
+        if(!res.ok) throw new Error("submit failed");
+        const data = await res.json();
+        return { list: data.list, rank: data.rank };
+      }catch(e){
+        // Offline-Fallback: lokal ablegen, kein globaler Rang möglich
+        try{
+          const raw = localStorage.getItem(STORAGE_PREFIX + "scores_" + group);
+          const list = raw ? JSON.parse(raw) : [];
+          list.push(entry);
+          list.sort((a,b) => (b.score - a.score) || (a.timeMs - b.timeMs));
+          localStorage.setItem(STORAGE_PREFIX + "scores_" + group, JSON.stringify(list.slice(0,200)));
+          const rank = list.findIndex(e2 => e2.ts === entry.ts) + 1;
+          return { list, rank };
+        }catch(e2){ return { list: [entry], rank: 1 }; }
+      }
+    },
+    async getPlayedCount(group){
+      try{
+        const res = await fetch("/api/played-count?group=" + encodeURIComponent(group));
+        if(!res.ok) throw new Error("count fetch failed");
+        const data = await res.json();
+        return data.count;
+      }catch(e){
+        try{ return parseInt(localStorage.getItem(STORAGE_PREFIX + "count_" + group) || "0", 10); }catch(e2){ return 0; }
+      }
+    },
+    async incPlayedCount(group){
+      try{
+        const res = await fetch("/api/played-count?group=" + encodeURIComponent(group), { method: "POST" });
+        if(!res.ok) throw new Error("inc failed");
+        const data = await res.json();
+        return data.count;
+      }catch(e){
+        const n = (await this.getPlayedCount(group)) + 1;
+        try{ localStorage.setItem(STORAGE_PREFIX + "count_" + group, String(n)); }catch(e2){}
+        return n;
+      }
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const screens = {
+    choice: $("screen-choice"),
+    quiz: $("screen-quiz"),
+    result: $("screen-result")
+  };
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove("active"));
+    screens[name].classList.add("active");
+    resetIdleTimer();
+  }
+
+  // Logo-Fallback, falls das Bild von hkvnordwest.ch nicht geladen werden kann
+  $("logoImg").addEventListener("error", function(){
+    this.style.display = "none";
+    $("logoFallback").style.display = "block";
+  });
+
+  /* ---------------- idle / kiosk reset ---------------- */
+  let idleTimer = null;
+  function resetIdleTimer(){
+    if(idleTimer) clearTimeout(idleTimer);
+    if(screens.choice.classList.contains("active")) return;
+    idleTimer = setTimeout(() => { goToChoice(); }, IDLE_RESET_MS);
+  }
+  ["pointerdown","keydown"].forEach(evt => {
+    document.addEventListener(evt, resetIdleTimer, {passive:true});
+  });
+
+  /* ---------------- quiz state ---------------- */
+  let currentGroup = "kind";
+  let currentQuestion = 0;
+  let answered = false;
+  let correctCount = 0;
+  let startTime = 0;
+  let timerInterval = null;
+  let playerNumber = 1;
+  let order = [];
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildProgress(total){
+    const el = $("progress");
+    el.innerHTML = "";
+    for(let i = 0; i < total; i++){
+      const seg = document.createElement("div");
+      seg.className = "seg";
+      el.appendChild(seg);
+    }
+  }
+  function updateProgress(index, total){
+    const segs = $("progress").children;
+    for(let i = 0; i < total; i++){
+      segs[i].classList.toggle("done", i < index);
+      segs[i].classList.toggle("now", i === index);
+    }
+  }
+
+  function formatTime(ms){ return (ms/1000).toFixed(1) + "s"; }
+  function formatTimerDisplay(ms){ return (ms/1000).toFixed(1); }
+
+  async function startQuiz(group){
+    currentGroup = group;
+    currentQuestion = 0;
+    correctCount = 0;
+    const list = QUESTIONS[group];
+    order = shuffle(list.map((_, i) => i)); // Reihenfolge der Fragen dynamisch mischen
+    $("qTotal").textContent = list.length;
+    buildProgress(list.length);
+    showScreen("quiz");
+    startTime = performance.now();
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      $("timer").textContent = formatTimerDisplay(performance.now() - startTime);
+    }, 100);
+    renderQuestion();
+  }
+
+  function renderQuestion(){
+    answered = false;
+    const list = QUESTIONS[currentGroup];
+    const q = list[order[currentQuestion]];
+    $("qNum").textContent = currentQuestion + 1;
+    $("qText").textContent = q.text;
+    updateProgress(currentQuestion, list.length);
+
+    const wrap = $("answers");
+    wrap.innerHTML = "";
+    // Antwortreihenfolge (Position der Boxen) dynamisch mischen
+    const optionOrder = shuffle(q.options.map((_, i) => i));
+    optionOrder.forEach((origIdx) => {
+      const btn = document.createElement("button");
+      btn.className = "answer";
+      btn.textContent = q.options[origIdx];
+      btn.addEventListener("click", () => handleAnswer(origIdx, q, btn, wrap));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(idx, q, btnEl, wrap){
+    if(answered) return;
+    answered = true;
+    const correct = idx === q.correct;
+    if(correct) correctCount++;
+    Array.from(wrap.children).forEach((b) => {
+      b.disabled = true;
+      const isCorrectBtn = b.textContent === q.options[q.correct];
+      if(isCorrectBtn) b.classList.add("correct");
+      else if(b === btnEl && !correct) b.classList.add("wrong");
+    });
+
+    setTimeout(() => {
+      currentQuestion++;
+      const list = QUESTIONS[currentGroup];
+      if(currentQuestion < list.length){
+        renderQuestion();
+      }else{
+        finishQuiz();
+      }
+    }, 550);
+  }
+
+  async function finishQuiz(){
+    clearInterval(timerInterval);
+    const totalMs = performance.now() - startTime;
+    const total = QUESTIONS[currentGroup].length;
+
+    playerNumber = await ScoreStore.incPlayedCount(currentGroup);
+
+    const entry = {
+      player: playerNumber,
+      group: currentGroup,
+      score: correctCount,
+      total: total,
+      timeMs: Math.round(totalMs),
+      ts: new Date().toISOString()
+    };
+    const { list, rank } = await ScoreStore.submitScore(currentGroup, entry);
+
+    $("resultScore").innerHTML = correctCount + "<span>/" + total + "</span>";
+    $("resultTime").textContent = "Zeit: " + formatTime(totalMs);
+    $("resultRank").innerHTML = rank > 0
+      ? "Aktuelle Platzierung: <b>" + rank + ".</b> von " + list.length
+      : "Platzierung folgt in der Bestenliste";
+    $("resultPlayer").textContent = "Spieler " + playerNumber + " · Kategorie: " + (currentGroup === "kind" ? "Kind" : "Erwachsene");
+    $("playedCount").textContent = playerNumber;
+    showScreen("result");
+  }
+
+  async function goToChoice(){
+    $("playedCount").textContent = await ScoreStore.getPlayedCount(currentGroup);
+    showScreen("choice");
+  }
+
+  /* ---------------- wiring ---------------- */
+  $("btnKind").addEventListener("click", () => startQuiz("kind"));
+  $("btnErwachsener").addEventListener("click", () => startQuiz("erwachsener"));
+  $("btnPlayAgain").addEventListener("click", () => startQuiz(currentGroup));
+
+  // init
+  ScoreStore.getPlayedCount("kind").then(n => $("playedCount").textContent = n);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "hkv-messe-quiz",
+  "private": true,
+  "version": "2.0.0",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
