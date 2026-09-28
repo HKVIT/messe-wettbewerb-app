@@ -49,7 +49,7 @@
     position:absolute;
     top:clamp(14px,2.4vw,26px);
     left:clamp(14px,2.4vw,26px);
-    height:clamp(34px,4.2vw,52px);
+    height:clamp(52px,7vw,84px);
     z-index:5;
   }
   .logo-fallback{
@@ -57,7 +57,7 @@
     top:clamp(14px,2.4vw,26px);
     left:clamp(14px,2.4vw,26px);
     font-weight:700;
-    font-size:clamp(18px,2vw,22px);
+    font-size:clamp(24px,3vw,32px);
     letter-spacing:.04em;
     color:var(--white);
     z-index:5;
@@ -157,6 +157,22 @@
   /* ---------- QUIZ ---------- */
   #screen-quiz{gap:clamp(18px,3vh,32px);}
   .quiz-top{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:clamp(44px,6vh,64px);}
+  .quiz-top-right{display:flex;align-items:center;gap:clamp(12px,1.6vw,20px);}
+  .btn-abort{
+    appearance:none;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:12px;
+    font-family:inherit;
+    font-weight:600;
+    font-size:clamp(13px,1.3vw,15px);
+    padding:8px 16px;
+    cursor:pointer;
+    transition:color .12s ease, border-color .12s ease;
+  }
+  .btn-abort:hover{color:var(--red);border-color:var(--red);}
+  .btn-abort:active{transform:scale(0.97);}
   .progress{display:flex;gap:6px;flex:1;}
   .progress .seg{height:6px;flex:1;border-radius:3px;background:var(--line);overflow:hidden;}
   .progress .seg.done{background:var(--accent);}
@@ -264,7 +280,10 @@
   <section id="screen-quiz" class="screen">
     <div class="quiz-top">
       <div class="progress" id="progress"></div>
-      <div class="timer" id="timer">00.0</div>
+      <div class="quiz-top-right">
+        <div class="timer" id="timer">00.0</div>
+        <button class="btn-abort" id="btnAbort" type="button">Abbrechen</button>
+      </div>
     </div>
     <div class="q-meta">Frage <span id="qNum">1</span> / <span id="qTotal">6</span></div>
     <div class="q-text" id="qText">Frage wird geladen…</div>
@@ -316,7 +335,7 @@
   };
 
   const IDLE_RESET_MS = 25000; // Zeit ohne Interaktion bis zurück zur Auswahl
-  const STORAGE_PREFIX = "messequiz_v4_";
+  const STORAGE_PREFIX = "messequiz_v5_";
 
   /* =========================================================
      ScoreStore — Datenzugriffs-Schicht
@@ -550,10 +569,17 @@
     showScreen("choice");
   }
 
+  // Runde abbrechen: kein Score-Eintrag, kein Spielzähler — zählt nicht mit.
+  function abortQuiz(){
+    clearInterval(timerInterval);
+    goToChoice();
+  }
+
   /* ---------------- wiring ---------------- */
   $("btnJugendliche").addEventListener("click", () => startQuiz("jugendliche"));
   $("btnErwachsener").addEventListener("click", () => startQuiz("erwachsener"));
   $("btnPlayAgain").addEventListener("click", () => startQuiz(currentGroup));
+  $("btnAbort").addEventListener("click", abortQuiz);
 
   // init
   ScoreStore.getPlayedCount("jugendliche").then(n => $("playedCount").textContent = n);

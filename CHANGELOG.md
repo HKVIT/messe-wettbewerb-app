@@ -1,28 +1,28 @@
 ---
-title: Changelog v4 — echte Fragen, Jugendliche statt Kind, eigenes Logo
-created: 2026-09-25
+title: Changelog v5 — Quiz abbrechen, grösseres Logo
+created: 2026-09-28
 ---
 
-# Changelog v4
+# Changelog v5
 
-## Neu gegenüber v3
-- Platzhalterfragen entfernt und durch die finalen Fragen aus `Fragen/Quiz_Jugendliche.docx` und `Fragen/Qiuz Fragen Erwachsene.docx` ersetzt (je 6 Fragen, 4 Antwortoptionen, dynamische Reihenfolge wie bisher).
-- Kategorie "Kind" auf der Startseite, in der Bestenliste, im Admin-Bereich und im Backend (Netlify Functions) in **"Jugendliche"** umbenannt (Gruppen-Schlüssel: `kind` → `jugendliche`).
-- HKV-Logo wird jetzt lokal aus der Datei `hkv-logo-nordwest_neg-4x.png` eingebunden statt über die externe URL `hkvnordwest.ch` (robuster, unabhängig von der Live-Website; Fallback-Text bleibt als zusätzliches Netz erhalten).
-- localStorage-Präfix für den Offline-Fallback von `messequiz_v2_` auf `messequiz_v4_` erhöht, damit keine alten Testdaten unter dem falschen Gruppennamen "kind" hängen bleiben.
+## Neu gegenüber v4
+- Neuer Button "Abbrechen" oben rechts im Quiz-Bildschirm (neben dem Timer). Ein Abbruch beendet die laufende Runde sofort und führt zurück zur Kategorie-Auswahl — es wird **kein** Score-Eintrag gespeichert und der Spielzähler ("Bisher gespielt") wird **nicht** erhöht. Die Runde zählt also nicht mit.
+- HKV-Logo oben links deutlich grösser dargestellt (`index.html` und `highscore.html`), Fallback-Text-Grösse passend mitskaliert.
+- `highscore.html`: oberer Innenabstand leicht vergrössert, damit das grössere Logo den Seitentitel nicht überlappt.
+- localStorage-Präfix für den Offline-Fallback von `messequiz_v4_` auf `messequiz_v5_` erhöht (wie bei früheren Versionssprüngen, damit keine alten Teststände durcheinandergeraten).
 
 ## Betroffene Dateien
-- `index.html` — Fragen, Gruppenname, Logo, Storage-Präfix
-- `highscore.html` — Tab "Kinder" → "Jugendliche", Gruppenname, Logo, Storage-Präfix
-- `admin.html` — Kategorie-Block "Kind" → "Jugendliche", Gruppenname, generische ID-Ableitung
-- `netlify/functions/scores.js`, `played-count.js`, `admin-clear.js` — `GROUPS`-Liste von `["kind","erwachsener"]` auf `["jugendliche","erwachsener"]` angepasst
-- `netlify.toml`, `package.json`, `netlify/functions/admin-login.js` — unverändert aus v3 übernommen
-- `hkv-logo-nordwest_neg-4x.png` — vom Nutzer abgelegtes Logo, neu Teil des Deploy-Ordners
+- `index.html` — neuer Abbrechen-Button (Markup, CSS, `abortQuiz()`-Funktion, Wiring), Logo-Grösse, Storage-Präfix
+- `highscore.html` — Logo-Grösse, oberer Innenabstand, Storage-Präfix
+- `admin.html` — unverändert aus v4 übernommen
+- `netlify/functions/*.js`, `netlify.toml`, `package.json`, `hkv-logo-nordwest_neg-4x.png` — unverändert aus v4 übernommen
 
-## Wichtig für den Go-Live
-- Da sich der Gruppen-Schlüssel geändert hat (`kind` → `jugendliche`), sind etwaige bereits in Netlify Blobs gespeicherte Testdaten unter `scores_kind` / `count_kind` aus v3 **nicht** automatisch sichtbar. Für einen sauberen Start vor dem Event einmal über den Admin-Bereich (oder Netlify-Blobs-Dashboard) prüfen/bereinigen.
-- Restliche offene Punkte aus v3 (Netlify verbinden, `ADMIN_PASSWORD` setzen, CI-Farben ggf. abgleichen) sind weiterhin offen — siehe `DEPLOY.md`.
+## Herkunft der Anpassungen
+Die beiden Punkte stammen aus `01_Anpassungen/Anpassungen Wettbewerb App.md` (Eintrag vom 2026-09-28):
+- "Ein Quiz soll abgebrochen und nicht gezählt werden können. Oben rechts soll ein Button sein, damit die Runde abgebrochen werden kann." → umgesetzt.
+- "Das Logo link ist grösser darzustellen, die Datei sollte dies zulassen?" → umgesetzt; die vorhandene PNG-Datei (`hkv-logo-nordwest_neg-4x.png`, 4x-Auflösung) liefert genug Pixel für die grössere Darstellung, ohne unscharf zu wirken.
 
 ## Offene Punkte / bewusste Annahmen
-- Emoji/Choice-Icon für "Jugendliche" auf 🎓 geändert (vorher 🧒 für "Kind"), Hinweistext an die Zielgruppe (Bewerbung/Lehre) angepasst.
-- Die Slang-Formulierungen der Jugendlichen-Fragen (Cap, sus, slay, cringe, Aura, lost) wurden 1:1 aus dem Word-Dokument übernommen.
+- Der Abbrechen-Button ist nur während der Quiz-Fragen sichtbar (nicht auf Start- oder Ergebnis-Bildschirm) — ein Abbruch nach der letzten Frage ist ohnehin nicht mehr nötig, da dann automatisch das Ergebnis gezeigt wird.
+- Kein Bestätigungsdialog beim Abbrechen (bewusst, für schnelle Kiosk-Bedienung); bei Bedarf könnte hier ein "Wirklich abbrechen?"-Zwischenschritt ergänzt werden.
+- Restliche offene Punkte aus v4/v3 (Netlify verbinden, `ADMIN_PASSWORD` setzen, CI-Farben ggf. abgleichen) sind weiterhin offen — siehe `DEPLOY.md`.
