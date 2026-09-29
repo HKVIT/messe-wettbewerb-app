@@ -1,28 +1,42 @@
 ---
-title: Changelog v5 — Quiz abbrechen, grösseres Logo
-created: 2026-09-28
+title: Changelog v6 — Startseite überarbeitet, Admin-Text entfernt, Dankeschön
+created: 2026-09-29
 ---
 
-# Changelog v5
+# Changelog v6
 
-## Neu gegenüber v4
-- Neuer Button "Abbrechen" oben rechts im Quiz-Bildschirm (neben dem Timer). Ein Abbruch beendet die laufende Runde sofort und führt zurück zur Kategorie-Auswahl — es wird **kein** Score-Eintrag gespeichert und der Spielzähler ("Bisher gespielt") wird **nicht** erhöht. Die Runde zählt also nicht mit.
-- HKV-Logo oben links deutlich grösser dargestellt (`index.html` und `highscore.html`), Fallback-Text-Grösse passend mitskaliert.
-- `highscore.html`: oberer Innenabstand leicht vergrössert, damit das grössere Logo den Seitentitel nicht überlappt.
-- localStorage-Präfix für den Offline-Fallback von `messequiz_v4_` auf `messequiz_v5_` erhöht (wie bei früheren Versionssprüngen, damit keine alten Teststände durcheinandergeraten).
+## Neu gegenüber v5
+- Startseite: Zähler "Bisher gespielt" ist jetzt nach Jugendliche und Erwachsene getrennt (vorher wurde nur der Zähler der Kategorie "Jugendliche" angezeigt, unabhängig davon, was tatsächlich gespielt wurde — die Anzahl stimmte dadurch nicht).
+- Adminbereich: Der erklärende Hinweistext zum Passwort auf der Login-Seite wurde vollständig entfernt. Login-Logik und Sicherheitsprüfung (serverseitig gegen `ADMIN_PASSWORD`) sind unverändert, nur der sichtbare Text ist weg.
+- HKV-Logo oben links nochmals deutlich prominenter dargestellt (`index.html` und `highscore.html`), inkl. angepasstem Freiraum darunter (Quiz-Kopfzeile, Bestenliste-Seitenkopf), damit nichts überlappt.
+- Startseite wirkt seriöser: die beiden Emoji-Icons (🎓/🧑‍💼) auf den Auswahl-Karten wurden entfernt, stattdessen ein schlichter Farbakzent-Strich über dem Titel.
+- Die beiden Auswahl-Buttons (Jugendliche/Erwachsene) sind jetzt farblich unterschieden (dezente Rahmen-/Akzentfarbe je Kategorie, aus der bestehenden HKV-Akzentpalette: Türkis für Jugendliche, Gold für Erwachsene).
+- Text der Erwachsenen-Karte angepasst auf "Fragen zu unserer Aus- und Weiterbildung".
+- Nach Abschluss eines Quiz erscheint auf der Ergebnis-Seite zusätzlich ein Dankeschön-Text: "Vielen Dank fürs Mitmachen! Gerne beraten wir dich rund um die Aus- und Weiterbildung."
+- localStorage-Präfix für den Offline-Fallback von `messequiz_v5_` auf `messequiz_v6_` erhöht (wie bei früheren Versionssprüngen).
 
 ## Betroffene Dateien
-- `index.html` — neuer Abbrechen-Button (Markup, CSS, `abortQuiz()`-Funktion, Wiring), Logo-Grösse, Storage-Präfix
+- `index.html` — getrennte Zähler (Markup, CSS, Script), grösseres Logo, Emoji entfernt, Farbakzente je Kategorie, Erwachsenen-Text, Dankeschön-Text, Storage-Präfix
 - `highscore.html` — Logo-Grösse, oberer Innenabstand, Storage-Präfix
-- `admin.html` — unverändert aus v4 übernommen
-- `netlify/functions/*.js`, `netlify.toml`, `package.json`, `hkv-logo-nordwest_neg-4x.png` — unverändert aus v4 übernommen
+- `admin.html` — Hinweistext zum Passwort entfernt
+- `netlify/functions/*.js`, `netlify.toml`, `package.json`, `hkv-logo-nordwest_neg-4x.png`, `DEPLOY.md` — unverändert aus v5 übernommen
 
 ## Herkunft der Anpassungen
-Die beiden Punkte stammen aus `01_Anpassungen/Anpassungen Wettbewerb App.md` (Eintrag vom 2026-09-28):
-- "Ein Quiz soll abgebrochen und nicht gezählt werden können. Oben rechts soll ein Button sein, damit die Runde abgebrochen werden kann." → umgesetzt.
-- "Das Logo link ist grösser darzustellen, die Datei sollte dies zulassen?" → umgesetzt; die vorhandene PNG-Datei (`hkv-logo-nordwest_neg-4x.png`, 4x-Auflösung) liefert genug Pixel für die grössere Darstellung, ohne unscharf zu wirken.
+Alle Punkte stammen aus `01_Anpassungen/Anpassungen Wettbewerb App.md`, Abschnitt "Version 6" (Eintrag vom 2026-09-28):
+- "Auf der Startseite bitte das bisher gespielt aufteilen in Jugendliche und Erwachsene, sonst stimmt die Anzahl nicht." → umgesetzt.
+- "Im Adminbereich bitte den Anweisungstext zum Passwort ganz entfernen." → umgesetzt.
+- "Das Logo darf noch einiges prominenter wirken." → umgesetzt (Logo nochmals vergrössert).
+- "Die Startseite sollte seriöser, weniger mit den 'kindlichen' Symbolen aufgebaut sein." → umgesetzt (Emojis entfernt).
+- "Beide Buttons farblich unterscheiden für Jugendlich und Erwachsene." → umgesetzt.
+- "Text bei Erwachsene anpassen: Fragen zu unserer Aus- und Weiterbildung." → umgesetzt.
+- "Nach Abschluss des Quiz soll ein Dankeschön für die Teilnahme erfolgen…" → umgesetzt.
 
 ## Offene Punkte / bewusste Annahmen
-- Der Abbrechen-Button ist nur während der Quiz-Fragen sichtbar (nicht auf Start- oder Ergebnis-Bildschirm) — ein Abbruch nach der letzten Frage ist ohnehin nicht mehr nötig, da dann automatisch das Ergebnis gezeigt wird.
-- Kein Bestätigungsdialog beim Abbrechen (bewusst, für schnelle Kiosk-Bedienung); bei Bedarf könnte hier ein "Wirklich abbrechen?"-Zwischenschritt ergänzt werden.
-- Restliche offene Punkte aus v4/v3 (Netlify verbinden, `ADMIN_PASSWORD` setzen, CI-Farben ggf. abgleichen) sind weiterhin offen — siehe `DEPLOY.md`.
+- Die Akzentfarben je Kategorie (Türkis/Gold) stammen aus der HKV-Brandfarben-Palette (Style Guide Jan. 2023) und wurden sparsam als Rahmen-/Detailfarbe eingesetzt, nicht grossflächig — bei Bedarf mit dem Marketing-Team gegenprüfen.
+- Der Dankeschön-Text ist für beide Kategorien identisch (so im Änderungswunsch als Beispieltext vorgegeben); falls je Zielgruppe ein eigener Text gewünscht ist, kann das ergänzt werden.
+- Kein Bestätigungsdialog beim Abbrechen (unverändert seit v5, bewusst für schnelle Kiosk-Bedienung).
+- Restliche offene Punkte aus v3/v4/v5 (Netlify verbinden, `ADMIN_PASSWORD` setzen, CI-Farben ggf. vollständig mit Styleguide abgleichen) sind weiterhin offen.
+
+## Nächste Schritte (Vorschlag)
+- v6 auf Netlify deployen und die Änderungen (Logo-Grösse, getrennte Zähler, Farbakzente, Dankeschön-Text) am echten Kiosk-Gerät prüfen.
+- Weitere Änderungswünsche einfach in `01_Anpassungen/Anpassungen Wettbewerb App.md` unter einem neuen Datum/Version ergänzen.

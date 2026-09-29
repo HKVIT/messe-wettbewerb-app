@@ -33,6 +33,7 @@
 
   /* ---- Login-Gate ---- */
   #gate{max-width:420px;margin-top:60px;}
+  #gate h1{margin-bottom:24px;}
   #gate input{
     width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--line);
     background:var(--panel);color:var(--white);font-family:inherit;font-size:16px;margin-bottom:14px;
@@ -69,11 +70,6 @@
 <!-- LOGIN GATE -->
 <div id="gate">
   <h1>Admin-Bereich</h1>
-  <p class="hint">
-    Bitte Passwort eingeben. Das Passwort wird serverseitig gegen die
-    Environment-Variable <code>ADMIN_PASSWORD</code> geprüft (Netlify Function
-    <code>admin-login</code>) — es steht nicht mehr im Quellcode dieser Seite.
-  </p>
   <input type="password" id="pw" placeholder="Passwort" autocomplete="off">
   <div class="error" id="pwError"></div>
   <button class="btn btn-primary" id="btnLogin">Anmelden</button>
