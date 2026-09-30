@@ -213,6 +213,9 @@
     grid-template-columns:1fr 1fr;
     grid-auto-rows:1fr;
     gap:clamp(12px,1.6vw,20px);
+    /* v7: auf Tablets sollen die Antwortboxen deutlich mehr Abstand zum
+       unteren Rand haben, statt bis knapp an den Rand zu reichen. */
+    margin-bottom:clamp(32px,7vh,96px);
   }
   .answer{
     background:var(--panel);
@@ -351,7 +354,7 @@
   };
 
   const IDLE_RESET_MS = 25000; // Zeit ohne Interaktion bis zurück zur Auswahl
-  const STORAGE_PREFIX = "messequiz_v6_";
+  const STORAGE_PREFIX = "messequiz_v7_";
 
   /* =========================================================
      ScoreStore — Datenzugriffs-Schicht
@@ -441,6 +444,30 @@
     this.style.display = "none";
     $("logoFallback").style.display = "block";
   });
+
+  /* =========================================================
+     v7: Kiosk-Vollbild (Fullscreen API)
+     ---------------------------------------------------------
+     Blendet auf Android/Chrome zusätzlich Status- und
+     Navigationsleiste aus, solange die Seite im Vollbildmodus
+     ist. Muss aus Sicherheitsgründen durch eine echte
+     Nutzerinteraktion ausgelöst werden — daher der Aufruf direkt
+     im Klick-Handler der Start-Buttons. Ein Systemwisch (z.B. von
+     unten) oder ein Tap ausserhalb kann den Vollbildmodus wieder
+     verlassen; das ist Browser-seitig nicht verhinderbar und
+     wird hier bewusst nicht als Fehler behandelt.
+  ========================================================= */
+  function requestKioskFullscreen(){
+    try{
+      if(document.fullscreenElement || document.webkitFullscreenElement) return;
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if(req){
+        const result = req.call(el);
+        if(result && typeof result.catch === "function") result.catch(() => {});
+      }
+    }catch(e){ /* Vollbild optional — Quiz funktioniert auch ohne */ }
+  }
 
   /* ---------------- idle / kiosk reset ---------------- */
   let idleTimer = null;
@@ -602,9 +629,9 @@
   }
 
   /* ---------------- wiring ---------------- */
-  $("btnJugendliche").addEventListener("click", () => startQuiz("jugendliche"));
-  $("btnErwachsener").addEventListener("click", () => startQuiz("erwachsener"));
-  $("btnPlayAgain").addEventListener("click", () => startQuiz(currentGroup));
+  $("btnJugendliche").addEventListener("click", () => { requestKioskFullscreen(); startQuiz("jugendliche"); });
+  $("btnErwachsener").addEventListener("click", () => { requestKioskFullscreen(); startQuiz("erwachsener"); });
+  $("btnPlayAgain").addEventListener("click", () => { requestKioskFullscreen(); startQuiz(currentGroup); });
   $("btnAbort").addEventListener("click", abortQuiz);
 
   // init
